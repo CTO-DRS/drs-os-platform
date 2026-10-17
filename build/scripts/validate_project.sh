@@ -190,15 +190,25 @@ else
 fi
 
 section "External endpoint allowlist"
-# Every http(s) URL host in tracked text must be on the verified allowlist.
+# Every http(s) URL host in repository text must be on the verified
+# allowlist. Gradle build outputs of the alpha apps (packages/apps/*/build,
+# .gradle caches) are transient gitignored artifacts and are excluded from
+# the scan exactly like .git.
 # git.invalid is the DOCUMENTED placeholder host (templates/docs only —
 # production manifests reject it separately via check_manifests.sh).
+# schemas.android.com — XML NAMESPACE IDENTIFIER in every Android manifest
+#   (xmlns:android); it is not a fetched endpoint.
+# www.gradle.org — official Gradle distribution host used by the alpha
+#   apps' build tooling (recorded in docs/build/dependency-provenance.md).
 ALLOWED_HOSTS='source.android.com
 android.googlesource.com
 www.apache.org
 editorconfig.org
-git.invalid'
-unknown_hosts="$(grep -rhoE 'https?://[A-Za-z0-9.-]+' --exclude-dir=.git "$ROOT" 2>/dev/null \
+git.invalid
+schemas.android.com
+www.gradle.org'
+unknown_hosts="$(find "$ROOT" \( -name .git -o -name .gradle -o -path '*/packages/apps/*/build' \) -prune -o -type f -print0 2>/dev/null \
+  | xargs -0 -r grep -hoE 'https?://[A-Za-z0-9.-]+' 2>/dev/null \
   | sed -E 's#^https?://##; s#\.+$##' | sort -u \
   | while IFS= read -r h; do
       printf '%s\n' "$ALLOWED_HOSTS" | grep -qxF "$h" || echo "$h"

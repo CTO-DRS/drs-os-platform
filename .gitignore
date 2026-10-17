@@ -9,6 +9,13 @@ soong_output/
 *.zip
 *.tar.gz
 
+# ---- Gradle build outputs (alpha apps under packages/apps) ----
+packages/apps/*/build/
+packages/apps/*/.gradle/
+.gradle/
+local.properties
+*.apk
+
 # ---- Signing material: hard-deny (defense in depth; scripts also scan) ----
 *.pk8
 *.x509.pem

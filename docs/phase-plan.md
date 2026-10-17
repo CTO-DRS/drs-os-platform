@@ -108,6 +108,55 @@ Explicitly out of scope for Phase 2: full AOSP sync (requires compliant
 host + authorization), any signing-key generation, any public repository
 publication, any cloud account creation.
 
+## Phase 3–6 — Alpha applications, packaging & distribution (COMPLETE — RE-EXECUTED, 2026-10-17)
+
+**Honest history:** phases 3–6 were originally executed in a prior session
+(version 0.3.0-phase3, tag `phase-6-distribution` in that workspace) and
+delivered to the user; a workspace reset then reverted the environment to
+its post-Phase-2 state (second reset recorded in the project worklog;
+reflog/dangling objects show no trace of the later commits in this copy).
+The phase was **re-authored from scratch** in this session as version
+`0.3.1-phase3`, incorporating screen-defect fixes the user reported with
+device screenshots.
+
+Delivered:
+
+- **Three zero-permission Kotlin/Compose apps** under `packages/apps/`
+  (DRSSettings, DRSAutomation, DRSSecurityCenter) — compileSdk 35 /
+  minSdk 29 / targetSdk 35, Kotlin 2.0.21, Compose BOM 2024.12.01,
+  Arabic-first RTL (layout direction forced RTL), dark/light theme parity
+  from branding/colors.md tokens.
+- **Screen-defect fixes** (from user screenshots of 0.3.0): clipped
+  unlabeled top field in the rule editor → labeled OutlinedTextFields in
+  a scrollable inset-aware column; oversized teal pill on the main screen
+  → fixed-height (52dp) create button; Latin chip labels breaking
+  mid-word → single-line chips.
+- **Deterministic rule engine** implemented per
+  docs/automation/rule-engine-spec.md (closed action registry, fixed
+  decision order, midnight-spanning windows) + **15 unit tests, all
+  passing**; actions recorded as audit entries, not executed (honest
+  alpha boundary); time trigger honestly disabled in UI.
+- **Verification gate** (build/scripts/make_installation_package.sh):
+  per-APK hard-fail checks (package name, versionName, minSdk/targetSdk,
+  Arabic label, zero android.permission.*, zero foreign uses-permission,
+  apksigner verify, zip sanity) + repository validators + automation
+  reference tests — all PASS.
+- **Installation package**:
+  `drs-os-0.3.1-phase3-alpha-installation-package.zip`
+  (24,478,286 bytes; sha256 3083428db2669926c024e100e63330d7f50a0c150bd29fdaf432057ff96e39a5)
+  with SHA256SUMS.txt (extraction re-verified 11/11), Arabic-first
+  INSTALL.md, RELEASE_NOTES.md, LICENSE/NOTICE, and per-APK badging
+  reports.
+- **Distribution**: public repository `drs-os-platform` (owner CTO-DRS)
+  with the source tree and a pre-release GitHub Release carrying the
+  package. Upload performed with a user-supplied token via transient
+  environment variable only; the token is the same over-scoped classic
+  PAT previously exposed in chat — revocation advised repeatedly and is
+  REQUIRED after this upload.
+
+Honest labels: **BUILD VERIFIED — RUNTIME NOT VERIFIED** (debug-signed,
+evaluation only). No AOSP checkout/build, no flashing, no paid services.
+
 ## Standing rule
 
 No phase transition happens automatically. Each phase ends with an explicit

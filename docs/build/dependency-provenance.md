@@ -55,3 +55,20 @@ inventory in tools/README.md is the enforced state.
    allowlist (validated per change by validate_project.sh); a new
    domain requires adding it to the allowlist **with a recorded reason**
    in the same change.
+
+## 5. Alpha-applications build hosts (recorded 2026-10-17, Phase 3–6 re-execution)
+
+The three standalone alpha applications (packages/apps/DRSSettings,
+DRSAutomation, DRSSecurityCenter) introduced the following build-time
+hosts; each is allowlisted in validate_project.sh with the reason below.
+
+| Host | Role | Reason it is trusted |
+|---|---|---|
+| www.gradle.org | Gradle 8.9 distribution download | official Gradle services host; distribution verified by size + sha256 at download time |
+| schemas.android.com | Android XML namespace identifier | NOT a fetched endpoint — it is the fixed xmlns identifier present in every AndroidManifest.xml in the Android ecosystem |
+
+Build-time dependency downloads (AndroidX/Compose artifacts) are fetched
+by Gradle from dl.google.com / repo.maven.apache.org and are build-host
+concerns recorded here for transparency; they are not runtime
+dependencies of the shipped APKs and no application code performs any
+network access.

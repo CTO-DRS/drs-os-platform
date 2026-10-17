@@ -9,6 +9,12 @@
 #   4. secret scan (token/key patterns)
 #   5. SPDX license-header check (delegates to build/scripts tool)
 #
+# Scan scope: Gradle build outputs of the alpha apps
+# (packages/apps/*/build and .gradle cache directories) are TRANSIENT
+# gitignored artifacts — they are excluded from the text-only repository
+# scans below, exactly like .git. Repository source (including the
+# repo-level build/ scripts directory) is always scanned.
+#
 # Guarantees: read-only, no network, no root, no destructive commands.
 # Exit codes: 0 = all executed checks passed, 1 = failures found.
 set -u -o pipefail
@@ -28,7 +34,8 @@ done < <(find "$ROOT" -type f -name '*.sh' -not -path '*/.git/*' -print0 2>/dev/
 echo "checked ${count} script(s)"
 
 echo "== 2. line endings (no CRLF) =="
-crlf="$(grep -rIl $'\r' --exclude-dir=.git "$ROOT" 2>/dev/null || true)"
+crlf="$(find "$ROOT" \( -name .git -o -name .gradle -o -path '*/packages/apps/*/build' \) -prune -o -type f -print0 2>/dev/null \
+  | xargs -0 -r grep -Il $'\r' 2>/dev/null || true)"
 if [ -n "$crlf" ]; then
   fail "CRLF line endings found in:"
   printf '%s\n' "$crlf"
@@ -37,7 +44,7 @@ else
 fi
 
 echo "== 3. oversized files (> 1 MiB) =="
-big="$(find "$ROOT" -type f -size +1M -not -path '*/.git/*' 2>/dev/null || true)"
+big="$(find "$ROOT" \( -name .git -o -name .gradle -o -path '*/packages/apps/*/build' \) -prune -o -type f -size +1M -print 2>/dev/null || true)"
 if [ -n "$big" ]; then
   fail "oversized files present (repository is text-only by design):"
   printf '%s\n' "$big"
@@ -47,7 +54,8 @@ fi
 
 echo "== 4. secret scan =="
 # Self-scan safe: pattern literals cannot match themselves.
-sec="$(grep -rInE --exclude-dir=.git \
+sec="$(find "$ROOT" \( -name .git -o -name .gradle -o -path '*/packages/apps/*/build' \) -prune -o -type f -print0 2>/dev/null \
+  | xargs -0 -r grep -InE \
   -e 'ghp_[A-Za-z0-9]{36}' \
   -e 'gho_[A-Za-z0-9]{36}' \
   -e 'ghs_[A-Za-z0-9]{36}' \
@@ -55,7 +63,7 @@ sec="$(grep -rInE --exclude-dir=.git \
   -e 'AKIA[0-9A-Z]{16}' \
   -e 'xox[baprs]-[A-Za-z0-9-]{10,}' \
   -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' \
-  "$ROOT" 2>/dev/null || true)"
+  2>/dev/null || true)"
 if [ -n "$sec" ]; then
   fail "secret-like material found — rotate the credential AND remove it:"
   printf '%s\n' "$sec"

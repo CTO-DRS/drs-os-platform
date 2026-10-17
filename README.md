@@ -1,12 +1,16 @@
 # DRS OS — Original, Security-First Mobile Operating System on AOSP
 
-> **Status: Phase 1 project scaffolding (documentation, decision records, and
-> static validation tooling only).**
+> **Status: Phase 3–6 (re-executed) — three standalone alpha applications
+> delivered as installable APKs + packaging & distribution tooling, on top
+> of the Phase 1–2 platform scaffolding.**
 > This repository does **not** contain a bootable operating system, a Linux
-> kernel, a SystemUI implementation, privileged applications, or any build
-> artifacts. Every component listed here is either upstream AOSP capability
-> that DRS OS plans to reuse, or a documented plan that has not been
-> implemented. See [docs/phase-plan.md](docs/phase-plan.md).
+> kernel, or a SystemUI implementation. The three alpha apps are ordinary
+> (zero-permission) Android applications that demonstrate the UI/logic
+> layers ahead of platform integration; every component beyond them is
+> either upstream AOSP capability DRS OS plans to reuse or a documented
+> plan that has not been implemented. See [docs/phase-plan.md](docs/phase-plan.md).
+> Distribution artifacts: **BUILD VERIFIED — RUNTIME NOT VERIFIED**
+> (debug-signed, evaluation only).
 
 ## What is DRS OS?
 
@@ -32,6 +36,22 @@ phase.
 | Security | SELinux enforcing, application sandboxing, least privilege, verified boot where supported |
 | Privacy | Data stays on device; no telemetry; transparent permission controls |
 | Branding | Original DRS OS identity; AOSP attribution preserved; third-party brands removed from user-facing surfaces |
+
+## Alpha applications (Phase 3–6, re-executed 2026-10-17)
+
+Three zero-permission Kotlin/Compose applications, Arabic-first RTL:
+
+| App | Package | Scope (honest alpha) |
+|---|---|---|
+| إعدادات DRS (DRSSettings) | `os.drs.settings` | read-only information surfaces: version, device info, policies |
+| أتمتة DRS (DRSAutomation) | `os.drs.automation` | deterministic local rule engine + audit log; 15 unit tests; actions are RECORDED, not executed (platform integration pending) |
+| مركز أمان DRS (DRSSecurityCenter) | `os.drs.security` | permission-free platform state display; no invented verdicts |
+
+Binding constraints verified automatically per build: **zero
+`android.permission.*`, no network code, no AI/ML, no WebView** — the
+only manifest-merger-injected entry is the same-package
+`DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` signature permission used by
+AndroidX internals.
 
 ## Repository layout
 
@@ -86,7 +106,8 @@ and [docs/build/zero-cost-workflow.md](docs/build/zero-cost-workflow.md).
 | Phase 0 | Environment & feasibility audit | Complete (2026-10-16); verdict: build infeasible in sandbox, feasible on compliant host |
 | Phase 1 | Project scaffolding, architecture, security design, validation tooling | Complete |
 | Phase 2 | Integration readiness, native UI specs, security foundation, automation reference model | Complete (2026-10-16) |
-| Phase 3 | Gated checkout & first boot on compliant host | Proposed — requires authorization; see [docs/phase-plan.md](docs/phase-plan.md) |
+| Phase 3–6 (re-executed) | Three alpha applications + packaging + distribution | Complete (2026-10-17); see [docs/phase-plan.md](docs/phase-plan.md) — original run lost to a workspace reset, re-authored from scratch with screen-defect fixes |
+| Phase 7 | AOSP checkout & first boot on compliant host | Proposed — requires authorization; see [docs/phase-plan.md](docs/phase-plan.md) |
 
 ## License and attribution
 
